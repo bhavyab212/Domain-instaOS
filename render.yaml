@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: instaos-nonilion-engine
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_API_KEY
+        value: dummy_api_key_or_groq_key
+      - key: LLM_MODEL
+        value: llama-3.1-8b-instant
+      - key: PUBLIC_BASE_URL
+        value: https://instaos-nonilion-engine.onrender.com
+      - key: NONILION_CALLBACK_URL
+        value: ""
+      - key: SHIPPING_STAGE_DELAY_SEC
+        value: "15"
+      - key: STATIC_DIR
+        value: generated_files
