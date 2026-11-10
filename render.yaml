@@ -10,11 +10,11 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: LLM_BASE_URL
-        value: https://api.groq.com/openai/v1
+        value: https://openrouter.ai/api/v1/chat/completions
       - key: LLM_API_KEY
-        value: dummy_api_key_or_groq_key
+        value: dummy_or_openrouter_key
       - key: LLM_MODEL
-        value: llama-3.1-8b-instant
+        value: dots-studio/dots-3-note-preview:free
       - key: PUBLIC_BASE_URL
         value: https://instaos-nonilion-engine.onrender.com
       - key: NONILION_CALLBACK_URL

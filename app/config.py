@@ -8,10 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env if present
 load_dotenv(BASE_DIR / ".env")
 
-# LLM Configuration
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+# LLM Configuration (OpenRouter / OpenAI compatible)
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
+LLM_MODEL = os.getenv("LLM_MODEL", "dots-studio/dots-3-note-preview:free")
 LLM_TIMEOUT_SECONDS = float(os.getenv("LLM_TIMEOUT_SECONDS", "4.0"))
 
 # Service & Networking

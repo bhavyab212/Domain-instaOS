@@ -154,10 +154,17 @@ def parse_customer_dm(text: str, sender: str = "") -> Dict[str, Any]:
 
     # Attempt LLM call with 4.0s timeout
     try:
-        url = f"{LLM_BASE_URL.rstrip('/')}/chat/completions"
+        base = LLM_BASE_URL.strip().rstrip("/")
+        if base.endswith("/chat/completions"):
+            url = base
+        else:
+            url = f"{base}/chat/completions"
+
         headers = {
             "Authorization": f"Bearer {LLM_API_KEY}",
             "Content-Type": "application/json",
+            "HTTP-Referer": "https://nonilion.com",
+            "X-Title": "InstaOS",
         }
         payload = {
             "model": LLM_MODEL,
@@ -166,19 +173,25 @@ def parse_customer_dm(text: str, sender: str = "") -> Dict[str, Any]:
                 {"role": "user", "content": f"Customer Handle: {sender}\nCustomer Message: {text}"},
             ],
             "temperature": 0.0,
-            "response_format": {"type": "json_object"},
         }
         with httpx.Client(timeout=LLM_TIMEOUT_SECONDS) as client:
             resp = client.post(url, headers=headers, json=payload)
             if resp.status_code == 200:
                 data = resp.json()
                 content = data["choices"][0]["message"]["content"]
-                parsed = json.loads(content)
-                parsed["parser_source"] = "llm_openai_compatible"
+                # Clean up any potential markdown code blocks returned by open-source models
+                cleaned_content = content.strip()
+                if "```json" in cleaned_content:
+                    cleaned_content = cleaned_content.split("```json")[1].split("```")[0].strip()
+                elif "```" in cleaned_content:
+                    cleaned_content = cleaned_content.split("```")[1].split("```")[0].strip()
+                
+                parsed = json.loads(cleaned_content)
+                parsed["parser_source"] = f"llm_openrouter_{LLM_MODEL}"
                 db.log_event("DMParserAgent", "PARSE_LLM_SUCCESS", f"LLM parsed DM from {sender or 'guest'}")
                 return parsed
             else:
-                logger.warning(f"LLM API returned status {resp.status_code}. Using regex fallback.")
+                logger.warning(f"LLM API returned status {resp.status_code}: {resp.text[:120]}. Using regex fallback.")
     except Exception as exc:
         logger.warning(f"LLM call failed or timed out ({exc}). Engaging deterministic regex fallback.")
 
